@@ -54,3 +54,4 @@ src/*.o
 src/*.so
 src/*.dll
 .ipynb_checkpoints/
+download.ipynb
