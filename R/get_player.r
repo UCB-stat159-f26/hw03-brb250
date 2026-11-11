@@ -21,7 +21,10 @@ male_dob <- function(name) {
     clean_input <- gsub(" ", "", tolower(name))
     clean_db <- tolower(paste0(df$name_first ,df$name_last))
     #check if 'clean_input' is contained in 'clean_db'
-    m <- df[grepl(clean_input, clean_db), ]
+    m <- df[clean_input == clean_db, ]
+    if (nrow(m) == 0) {
+        m <- df[stringr::str_detect(clean_db, clean_input), ]
+    }
     if (nrow(m) > 0 && !is.na(m$dob[1]) && m$dob[1] != '') lubridate::ymd(m$dob[1]) else NULL
 }
 
@@ -37,8 +40,7 @@ compute_opp_age <- function(df) {
 
 #filter columns of raw df
 clean_df <- function(df, opp_age, name) {
-    player_dob <- female_dob(name)
-    if (is.null(player_dob)) player_dob <- male_dob(name)
+    player_dob <- if (is_female(df)) female_dob(name) else male_dob(name)
     match_date <- lubridate::ymd(df[[1]])
     player_age <- lubridate::time_length(lubridate::interval(player_dob, match_date), "year")
     data.frame(
@@ -50,17 +52,21 @@ clean_df <- function(df, opp_age, name) {
 }
 
 #helper function to parse JS file into a data frame
-parse_js_data <- function(js_content, name) {
+parse_js_data <- function(js_content) {
     ctx <- V8::v8()
-    ctx$eval(paste(js_content, collapse="\n"))
+    ctx$eval(js_content)
     raw <- ctx$get("morematchmx")
-    df <- as.data.frame(do.call(rbind, raw))
-    opp_age <- compute_opp_age(df)
-    clean_df(df, opp_age, name)
+    if (is.matrix(raw)) {
+        df <- as.data.frame(raw)
+    } else {
+        df <- as.data.frame(do.call(rbind, lapply(raw, unlist)))
+    }
+    return(df)
 }
 
 #public function that takes a player name and returns a cleaned table for graphic purporses
 get_player <- function(name) {
+    #normalize name format for url construction
     words <- unlist(strsplit(tolower(name), "[^a-z0-9]+"))
     words <- words[words != ""]
     #clean player name & build url
@@ -68,17 +74,20 @@ get_player <- function(name) {
     url <- paste0("https://www.tennisabstract.com/jsmatches/",clean_name,"Career.js")
     #download to temporary file
     temp_file <- tempfile(fileext=".js")
-    status <- download.file(url, temp_file, quiet=TRUE)
-
-    #returns meaningful error message if download fails
-    if (inherits(status, "try-error") || status != 0) {
+    #throws meaningful error message for invalid player name
+    res <- tryCatch(suppressWarnings(download.file(url, temp_file, quiet = TRUE)),
+                    error = function(e) NULL
+    )
+    if (is.null(res) || res != 0) {
         stop(paste("Invalid player name:", name))
     }
     #read & parse JS file
     js_content <- readLines(temp_file, warn=FALSE)
     unlink(temp_file)
     #parse JS file into a data frame with helper function
-    parse_js_data(js_content, name)
+    raw_df <- parse_js_data(js_content)
+    opp_age <- compute_opp_age(raw_df)
+    clean_df(raw_df, opp_age, name)
 }
 
 
