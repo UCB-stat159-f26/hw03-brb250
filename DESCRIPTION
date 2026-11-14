@@ -12,8 +12,8 @@ LazyData: true
 Imports:
     V8, 
     ggplot2, 
-    dplyr, 
-    lubridate
+    lubridate,
+    stringr
 Config/roxygen2/version: 8.1.1
 Suggests: 
     testthat (>= 3.0.0)
