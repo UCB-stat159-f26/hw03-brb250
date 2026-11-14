@@ -1,0 +1,24 @@
+================================================================================
+AI USAGE & ACKNOWLEDGMENT DOCUMENTATION
+
+1. TOOL IDENTIFICATION
+   - Primary AI Tool / Model: Google Gemini / Large Language Model
+   - Access Method: Web interface and Google Search integrated AI summaries
+
+2. SPECIFIC USE CASES & SCOPE OF ASSISTANCE
+   a. R Package Architecture & Documentation:
+      - Used AI for guidance on R package structure (DESCRIPTION, NAMESPACE,
+        roxygen2 tags, testthat unit test scaffolding, and .Rbuildignore rules).
+   b. Code Debugging & Syntax Searching:
+      - Utilized AI queries for R, ggplot2, and devtools syntax lookups,
+        troubleshooting error messages, and resolving code execution issues.
+   c. Language Refinement & README Editing:
+      - Used AI for structural feedback, sentence clarity, and editing
+        assistance across README.md documentation.
+
+3. HUMAN OVERSIGHT, VERIFICATION & RESPONSIBILITY
+   - All AI-suggested text revisions, code snippets, and debugging fixes were
+     manually reviewed, tested, and integrated by the author.
+   - The author assumes full responsibility for the accuracy, academic
+     integrity, and reproducibility of all submitted materials.
+================================================================================
