@@ -43,12 +43,14 @@ clean_df <- function(df, opp_age, name) {
     player_dob <- if (is_female(df)) female_dob(name) else male_dob(name)
     match_date <- lubridate::ymd(df[[1]])
     player_age <- lubridate::time_length(lubridate::interval(player_dob, match_date), "year")
-    data.frame(
+    res <- data.frame(
         match_date=match_date,
         outcome = ifelse(df[[5]] == "W", "Match won", "Match lost"),
         player_age = player_age,
         age_diff = player_age - opp_age
     )
+    attr(res, "player_name") <- name
+    res
 }
 
 #helper function to parse JS file into a data frame
@@ -64,7 +66,11 @@ parse_js_data <- function(js_content) {
     return(df)
 }
 
-#public function that takes a player name and returns a cleaned table for graphic purporses
+#' @title Get player career match data
+#' @description Retrieves and cleans career match data for a given tennis player.
+#' @param name Character string with player's name.
+#' @return A data frame of career matches.
+#' @export
 get_player <- function(name) {
     #normalize name format for url construction
     words <- unlist(strsplit(tolower(name), "[^a-z0-9]+"))
@@ -89,6 +95,7 @@ get_player <- function(name) {
     opp_age <- compute_opp_age(raw_df)
     clean_df(raw_df, opp_age, name)
 }
+
 
 
 
